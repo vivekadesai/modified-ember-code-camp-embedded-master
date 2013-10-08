@@ -5,19 +5,26 @@ DS.DjangoRESTSerializer = DS.RESTSerializer.extend({
     init: function() {
         this._super.apply(this, arguments);
     },
+      extractDjangoPayload: function(store, type, payload) {
+          type.eachRelationship(function(key, relationship){
+              // TODO should we check if relationship is marked as embedded?
+              //alert(relationship.type);
+              if (!Ember.isNone(payload[key]) && typeof(payload[key][0]) !== 'number' && relationship.kind ==='hasMany') {
+                  if (payload[key].constructor.name === 'Array' && payload[key].length > 0) {
+                      var ids = payload[key].mapBy('id'); //todo find pk (not always id)
+                      this.pushArrayPayload(store, relationship.type, payload[key]);
+                      payload[key] = ids;
+                  }
+                  
+              }
+              else if (!Ember.isNone(payload[key]) && typeof(payload[key]) === 'object' && relationship.kind ==='belongsTo') {
+                var id=payload[key].id;
+                this.pushSinglePayload(store,relationship.type,payload[key]);
 
-    extractDjangoPayload: function(store, type, payload) {
-        type.eachRelationship(function(key, relationship){
-            // TODO should we check if relationship is marked as embedded?
-            if (!Ember.isNone(payload[key]) && typeof(payload[key][0]) !== 'number') {
-                if (payload[key].constructor.name === 'Array' && payload[key].length > 0) {
-                    var ids = payload[key].mapBy('id'); //todo find pk (not always id)
-                    this.pushArrayPayload(store, relationship.type, payload[key]);
-                    payload[key] = ids;
-                }
-            }
-        }, this);
-    },
+                payload[key]=id;
+              }
+          }, this);
+      },
 
     extractSingle: function(store, type, payload) {
         // using normalize from RESTSerializer applies transforms and allows

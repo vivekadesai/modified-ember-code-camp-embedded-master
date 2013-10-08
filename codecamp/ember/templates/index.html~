@@ -14,7 +14,6 @@
   {{session.name}}<br />
   {{#each speaker in session.speakers}}
     {{speaker.name}}<br />
-    {{speaker.location}}
   {{/each}}
   {{#each tag in session.tags}}
     {{tag.description}}<br />
@@ -42,6 +41,7 @@
 
 <script type="text/x-handlebars" data-template-name="speaker">
   {{model.name}}
+  {{model.location.name}}
 </script>
 
 {% endverbatim %}
